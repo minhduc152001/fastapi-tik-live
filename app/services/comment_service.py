@@ -1,3 +1,5 @@
+from typing import List
+
 from pymongo.errors import DuplicateKeyError
 
 from app.config.database import comments_collection
@@ -19,3 +21,11 @@ async def create_comment_service(comment: Comment) -> CommentResponse:
         if existing_comment:
             existing_comment["id"] = str(existing_comment["_id"])
             return CommentResponse(**existing_comment)
+
+async def list_comments_by_room_id(room_id: str) -> List[CommentResponse]:
+    comments = comments_collection.find({"room_id": room_id})
+    comment_list = []
+    for comment in comments:
+        comment["id"] = str(comment["_id"])
+        comment_list.append(CommentResponse(**comment))
+    return comment_list

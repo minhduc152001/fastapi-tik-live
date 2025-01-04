@@ -12,9 +12,11 @@ database = client[DATABASE]
 users_collection = database["users"]
 rooms_collection = database["rooms"]
 comments_collection = database["comments"]
-customers_collection = database["customers"]
+local_customers_collection = database["local-customers"]
+global_customers_collection = database["global-customers"]
 
 # Set unique
 rooms_collection.create_index([("room_str_id", 1), ("user_id", 1)], unique=True)
-comments_collection.create_index([("msg_id", 1), ("user_id", 1)], unique=True)
-customers_collection.create_index([("tiktok_user_id", 1)], unique=True)
+comments_collection.create_index([("msg_id", 1), ("room_id", 1)], unique=True)
+local_customers_collection.create_index([("customer_user_id", 1), ("from_live_of_tiktok_id", 1)], unique=True)
+global_customers_collection.create_index([("customer_user_id", 1)], unique=True)

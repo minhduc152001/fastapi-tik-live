@@ -46,7 +46,7 @@ async def update_room_service(room_id: str, update_data: dict) -> RoomResponse:
 async def list_room_service(user_id: str) -> List[RoomResponse]:
     updated_rooms = rooms_collection.find({"user_id": user_id})
     room_list = []
-    for room in updated_rooms:  # Use async for
+    for room in updated_rooms:
         room["id"] = str(room["_id"])  # Convert ObjectId to string
         room_list.append(RoomResponse(**room))  # Unpack dict to create RoomResponse
     return room_list
