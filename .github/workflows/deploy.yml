@@ -21,7 +21,7 @@ jobs:
       - name: Deploy application
         run: |
           ssh -o StrictHostKeyChecking=no root@15.235.167.234 << 'EOF'
-          cd ./apps/fastapi-tik-live
+          cd ./app/fastapi-tik-live
           git pull origin main
           docker build -t fastapi-tik-live .
           docker run -d --name fastapi-tik-live -p 8080:8080 fastapi-tik-live
