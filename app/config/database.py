@@ -14,6 +14,7 @@ rooms_collection = database["rooms"]
 comments_collection = database["comments"]
 local_customers_collection = database["local-customers"]
 global_customers_collection = database["global-customers"]
+order_collection = database["orders"]
 
 # Set unique
 rooms_collection.create_index([("room_str_id", 1), ("user_id", 1)], unique=True)

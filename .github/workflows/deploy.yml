@@ -18,11 +18,14 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Add SSH host key to known_hosts
+        run: ssh-keyscan 15.235.167.234 >> ~/.ssh/known_hosts
+
       - name: Deploy application
         run: |
           ssh -o StrictHostKeyChecking=no root@15.235.167.234 << 'EOF'
           cd ./app/fastapi-tik-live
-          git pull origin main
+          git pull origin main || true 
           docker build -t fastapi-tik-live .
-          docker run -d --name fastapi-tik-live -p 8080:8080 fastapi-tik-live
+          docker-compose up -d --build
           EOF

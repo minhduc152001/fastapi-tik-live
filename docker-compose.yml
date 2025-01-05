@@ -1,0 +1,7 @@
+version: "3.12"  # Or your preferred version
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    restart: always #Restart if docker container down
