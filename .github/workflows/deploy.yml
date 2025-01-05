@@ -23,6 +23,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@15.235.167.234 << 'EOF'
           cd ./app/fastapi-tik-live
           git pull origin main || true 
-          docker build -t fastapi-tik-live .
           docker-compose up -d --build
           EOF
