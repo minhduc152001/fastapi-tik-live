@@ -6,4 +6,5 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    restart: always #Restart if docker container down
+    restart: always
+    network_mode: "host" # Use the host network to access local services
