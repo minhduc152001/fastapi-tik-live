@@ -28,17 +28,12 @@ app.include_router(room_routes, prefix="/api/v1/rooms", tags=["rooms"])
 app.include_router(comment_router, prefix="/api/v1/comments", tags=["comments"])
 app.include_router(customer_router, prefix="/api/v1/customers", tags=["customers"])
 app.include_router(order_router, prefix="/api/v1/orders", tags=["orders"])
-@app.post('/webhook', response_description = "Receive webhook", status_code = 200)
-async def receive_webhook(body: dict):
-    return body
 
 async def start_background_tasks():
     asyncio.create_task(process_pending_customers())
 @app.on_event("startup")
 async def startup_event():
     await start_background_tasks()
-
-
 
 @app.get("/", tags=["root"])
 async def root():
