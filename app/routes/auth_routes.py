@@ -2,12 +2,12 @@ from typing import List
 
 from fastapi import APIRouter, status, Header
 from app.controllers.auth_controller import signup, login, logout, get_me, list_users, update_user
-from app.models.user_model import User, UserResponse, UserLogin, UserLoginResponse, UserUpdateRequest
+from app.models.user_model import UserResponse, UserLogin, UserLoginResponse, UserUpdateRequest, UserSignUp
 
 auth_router = APIRouter()
 
 @auth_router.post("/signup", response_description="Create new user", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
-async def signup_route(user: User):
+async def signup_route(user: UserSignUp):
     return await signup(user)
 
 @auth_router.post("/login", response_description="Login user", status_code=status.HTTP_200_OK,response_model=UserLoginResponse)

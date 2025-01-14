@@ -28,6 +28,12 @@ class UserResponse(BaseModel):
     paid: bool
     verified: bool
 
+class UserSignUp(BaseModel):
+    email: EmailStr
+    password: str
+    phone: str
+    tiktok_ids: List[str] = ()
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str

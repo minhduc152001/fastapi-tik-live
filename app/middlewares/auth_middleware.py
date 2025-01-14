@@ -12,3 +12,10 @@ async def auth_middleware(token: str):
     user = get_user_by_email(payload["email"])
     if not user:
         raise HTTPException(status_code = 404, detail = "User not found")
+    return user
+
+async def auth_admin_middleware(token: str):
+    user = await auth_middleware(token)
+    if user.get("role") == "admin":
+        return user
+    raise HTTPException(status_code = 403, detail = "Admins only")
