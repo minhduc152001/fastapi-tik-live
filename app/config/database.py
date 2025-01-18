@@ -20,6 +20,7 @@ qr_collection = database["qr"]
 sms_collection = database["sms"]
 balance_movements_collection = database["balance-movements"]
 invoices_collection = database["invoices"]
+prices_collection = database["prices"]
 
 # Set unique
 rooms_collection.create_index([("room_str_id", 1), ("user_id", 1)], unique=True)

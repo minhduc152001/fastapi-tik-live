@@ -1,9 +1,9 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, BackgroundTasks
 from jose import JWTError
 from app.services.auth_service import decode_access_token, get_user_by_email
 from app.services.tiktok_service import connect_live_service
 
-async def connect_live(token: str, tiktok_id: str):
+async def connect_live(token: str, tiktok_id: str, background_tasks: BackgroundTasks):
     try:
         payload = decode_access_token(token)
     except JWTError:
@@ -14,5 +14,5 @@ async def connect_live(token: str, tiktok_id: str):
     if not tiktok_id in user["tiktok_ids"]:
         raise HTTPException(status_code=403, detail="Not include this TikTok ID")
 
-    result = await connect_live_service(tiktok_id, payload["id"])
+    result = await connect_live_service(tiktok_id, payload["id"], background_tasks)
     return result

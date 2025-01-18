@@ -16,8 +16,6 @@ class User(BaseModel):
     password: str
     tiktok_ids: List[str] = ()
     role: str = 'user'
-    paid: bool = False
-    verified: bool = False
 
 class UserResponse(BaseModel):
     id: str
@@ -25,14 +23,15 @@ class UserResponse(BaseModel):
     phone: str
     tiktok_ids: List
     role: str
-    paid: bool
-    verified: bool
+    subscription_expired_at: datetime = None
+    createdAt: datetime
 
 class UserSignUp(BaseModel):
     email: EmailStr
     password: str
     phone: str
     tiktok_ids: List[str] = ()
+    subscription_expired_at: datetime = None
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -45,6 +44,11 @@ class UserLoginResponse(BaseModel):
 class UserUpdateRequest(BaseModel):
     phone: Optional[str] = None
     tiktok_ids: Optional[List[str]] = None
+
+class AdminUpdateUserRequest(BaseModel):
+    phone: Optional[str] = None
+    tiktok_ids: Optional[List[str]] = None
+    subscription_expired_at: Optional[datetime] = None
 
 def get_password_hash(password):
     bytes = password.encode('utf-8')

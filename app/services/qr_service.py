@@ -1,9 +1,10 @@
 from datetime import datetime
+from typing import List
 
 from bson import ObjectId
 from fastapi import HTTPException
 
-from app.config.database import qr_collection
+from app.config.database import qr_collection, users_collection
 from app.constant.enum import bank_names
 from app.models.qr_model import QRRequest, QRResponse
 
@@ -26,3 +27,21 @@ async def create_qr_code_service(user_id: str, details: QRRequest):
         "payment_description": payment_description,
         "url": f"https://qr.sepay.vn/img?acc={qr.get("account_number")}&bank={qr.get("bank_code")}&amount={qr.get("total_amount")}&des={payment_description}&template=compact"
     }
+
+async def list_qr_codes_service():
+    qr_codes = qr_collection.find()
+    qr_list: List[dict] = []
+    for qr_code in qr_codes:
+        qr_list.append({
+            "id": str(qr_code["_id"]),
+            "bank_code": qr_code["bank_code"],
+            "account_number": qr_code["account_number"],
+            "amount_per_month": qr_code["amount_per_month"],
+            "subscription_months": qr_code["subscription_months"],
+            "bank_name": qr_code["bank_name"],
+            "payment_description": qr_code["payment_description"],
+            "created_at": qr_code["created_at"],
+            "total_amount": qr_code["total_amount"],
+            "user_email": users_collection.find_one({"_id": ObjectId(qr_code["user_id"])}).get("email")
+        })
+    return qr_list

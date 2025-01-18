@@ -1,11 +1,14 @@
 from fastapi import HTTPException
 from jose import JWTError
+
+from app.middlewares.auth_middleware import auth_admin_middleware
 from app.services.auth_service import create_user, authenticate_user, generate_access_token, decode_access_token, \
-    get_user_by_email, get_users, update_user_info
-from app.models.user_model import User, UserResponse, UserLogin, UserLoginResponse, UserUpdateRequest
+    get_user_by_email, get_users, update_user_info, delete_user_service, update_admin_user_info
+from app.models.user_model import User, UserResponse, UserLogin, UserLoginResponse, UserUpdateRequest, UserSignUp, \
+    AdminUpdateUserRequest
 
 
-async def signup(user: User):
+async def signup(user):
     new_user = await create_user(user)
     return UserResponse(
         id=new_user["_id"],
@@ -13,8 +16,8 @@ async def signup(user: User):
         phone=new_user["phone"],
         tiktok_ids=new_user.get("tiktok_ids", []),
         role=new_user["role"],
-        paid=new_user["paid"],
-        verified=new_user["verified"]
+        subscription_expired_at=new_user["subscription_expired_at"] or None,
+        createdAt = new_user["createdAt"],
     )
 
 async def login(body: UserLogin):
@@ -50,8 +53,8 @@ async def get_me(token: str):
         phone= user["phone"],
         tiktok_ids= user["tiktok_ids"],
         role= user["role"],
-        paid= user["paid"],
-        verified= user["verified"]
+        subscription_expired_at = user["subscription_expired_at"],
+        createdAt = user["createdAt"],
     )
 
 async def list_users(token: str):
@@ -62,7 +65,7 @@ async def list_users(token: str):
     if payload["role"] != "admin":
         raise HTTPException(status_code=403, detail="Access forbidden: Admins only")
 
-    users = get_users()
+    users = await get_users()
     return users
 
 async def update_user(token: str, user_update: UserUpdateRequest):
@@ -74,3 +77,12 @@ async def update_user(token: str, user_update: UserUpdateRequest):
     user_id = payload["id"]
 
     return update_user_info(user_id, user_update)
+
+async def delete_user(token: str, user_id: str):
+    await auth_admin_middleware(token)
+    await delete_user_service(user_id)
+    return
+
+async def update_user_admin(token: str, user_id: str, user_update: AdminUpdateUserRequest):
+    await auth_admin_middleware(token)
+    return update_admin_user_info(user_id, user_update)
