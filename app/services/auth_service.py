@@ -19,8 +19,8 @@ async def create_user(user: dict):
         "password": hashed_password,
         "role": "user",
         "subscription_expired_at": user.get("subscription_expired_at") if user.get("subscription_expired_at") else datetime.now(),
-        "createdAt": datetime.now(),
-        "updatedAt": datetime.now()
+        "created_at": datetime.now(),
+        "updated_at": datetime.now()
     })
 
     # Insert into database
@@ -66,7 +66,7 @@ async def get_users():
             tiktok_ids=user["tiktok_ids"],
             role=user["role"],
             subscription_expired_at = user["subscription_expired_at"],
-            createdAt = user["createdAt"],
+            created_at = user["created_at"],
     )
         for user in users
     ]
@@ -89,7 +89,7 @@ def update_user_info(user_id: str, user_update: UserUpdateRequest):
             tiktok_ids=updated_user["tiktok_ids"],
             role=updated_user["role"],
             subscription_expired_at=updated_user["subscription_expired_at"],
-            createdAt=updated_user["createdAt"],
+            created_at=updated_user["created_at"],
         )
     else:
         raise HTTPException(status_code=404, detail="User not found")
@@ -110,7 +110,7 @@ def update_admin_user_info(user_id: str, user_update: AdminUpdateUserRequest):
             tiktok_ids=updated_user["tiktok_ids"],
             role=updated_user["role"],
             subscription_expired_at=updated_user["subscription_expired_at"],
-            createdAt=updated_user["createdAt"],
+            created_at=updated_user["created_at"],
         )
     else:
         raise HTTPException(status_code=404, detail="User not found")

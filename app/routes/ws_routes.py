@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import WebSocket, WebSocketDisconnect, APIRouter
 from TikTokLive import TikTokLiveClient
 from TikTokLive.events import CommentEvent
@@ -17,11 +19,26 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             # Start TikTokLive client for the username
             client = TikTokLiveClient(username)
 
+            room_str_id = str(client.room_id)
+            print(f"Room ID: {room_str_id}")
+
             @client.on(CommentEvent)
             async def on_comment(event: CommentEvent):
+                print(f"Comment: {event.to_json()}")
+                comment = {
+                    "room_id": room_str_id,
+                    "msg_id": str(event.common.msg_id),
+                    "from_live_of_tiktok_id": event.at_user.unique_id,
+                    "customer_user_id": str(event.user.id),
+                    "customer_tiktok_id": event.user.unique_id,
+                    "customer_name": event.user.nickname,
+                    "comment": event.comment,
+                    "profile_picture_url": event.user.avatar_thumb.url_list[0],
+                    "created_at": datetime.fromtimestamp(int(event.common.create_time / 1000))
+                }
                 # Send comments to the WebSocket
                 try:
-                    await websocket.send_text(event.comment)
+                    await websocket.send_json(comment)
                 except WebSocketDisconnect:
                     print(f"WebSocket disconnected for username: {username}")
 

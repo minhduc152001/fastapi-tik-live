@@ -17,7 +17,7 @@ async def signup(user):
         tiktok_ids=new_user.get("tiktok_ids", []),
         role=new_user["role"],
         subscription_expired_at=new_user["subscription_expired_at"] or None,
-        createdAt = new_user["createdAt"],
+        created_at = new_user["created_at"],
     )
 
 async def login(body: UserLogin):
@@ -54,7 +54,7 @@ async def get_me(token: str):
         tiktok_ids= user["tiktok_ids"],
         role= user["role"],
         subscription_expired_at = user["subscription_expired_at"],
-        createdAt = user["createdAt"],
+        created_at = user["created_at"],
     )
 
 async def list_users(token: str):

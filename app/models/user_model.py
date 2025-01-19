@@ -24,7 +24,7 @@ class UserResponse(BaseModel):
     tiktok_ids: List
     role: str
     subscription_expired_at: datetime = None
-    createdAt: datetime
+    created_at: datetime
 
 class UserSignUp(BaseModel):
     email: EmailStr
