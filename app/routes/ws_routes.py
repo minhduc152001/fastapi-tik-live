@@ -41,7 +41,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             # Save the client
             clients[username] = client
             # Run the TikTokLive client asynchronously
-            asyncio.create_task(client.start(fetch_room_info = True))
+            asyncio.create_task(client.start())
 
         # Keep the WebSocket connection alive
         while True:
