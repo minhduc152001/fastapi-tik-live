@@ -106,8 +106,6 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
     msg = data.msg
     transaction = parse_transaction(bank_code, msg)
 
-    print(f"Transaction: {transaction}")
-
     # Store balance changes
     balance_movements_collection.insert_one(transaction)
 
@@ -120,9 +118,6 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
     month_usage = qr.get("subscription_months")
     # Update usage time
     new_expiry_date = datetime.now() + timedelta(days=30 * month_usage)
-
-    print(f"New expiry date: {new_expiry_date}")
-
     user = users_collection.find_one_and_update(
         {"_id": ObjectId(qr.get("user_id"))},
         { "$set": {"subscription_expired_at": new_expiry_date}}
