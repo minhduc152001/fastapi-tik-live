@@ -8,6 +8,7 @@ webhook_routes = APIRouter()
 
 @webhook_routes.post("/", response_description = 'Catch payment webhook', status_code = 200, response_model = RetrieveWebhookBase)
 async def webhook_handler(data: RetrieveWebhookBase):
+    print(f"Received webhook request: {data}")
     return await retrieve_webhook(data)
 
 @webhook_routes.get("/", response_description = 'Catch payment webhook', status_code = 200, response_model = CheckTransaction)
