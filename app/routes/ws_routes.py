@@ -12,8 +12,6 @@ async def handle_tiktok_live(websocket: WebSocket, tiktok_id: str):
 
     @client.on(CommentEvent)
     async def on_comment(event: CommentEvent):
-        print(f'Received comment: {event.to_json()}')
-
         comment = {
             "room_id": str(event.common.room_id),
             "msg_id": str(event.common.msg_id),
