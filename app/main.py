@@ -38,7 +38,7 @@ app.include_router(customer_router, prefix="/api/v1/customers", tags=["customers
 app.include_router(order_router, prefix="/api/v1/orders", tags=["orders"])
 app.include_router(bank_routes, prefix="/api/v1/banks", tags=["banks"])
 app.include_router(qr_router, prefix= "/api/v1/qr", tags=["qr"])
-app.include_router(webhook_routes, prefix="/api/v1/webhook", tags=["webhooks"])
+app.include_router(webhook_routes, prefix="/api/v1/payment", tags=["webhooks"])
 app.include_router(sms_router, prefix="/api/v1/sms", tags=["admin", "sms"])
 app.include_router(balance_router, prefix="/api/v1/balance-movements", tags=["admin", "balance-movements"])
 app.include_router(invoice_router, prefix="/api/v1/invoices", tags=["admin", "invoices"])
