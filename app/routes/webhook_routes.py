@@ -10,6 +10,6 @@ webhook_routes = APIRouter()
 async def webhook_handler(data: RetrieveWebhookBase):
     return await retrieve_webhook(data)
 
-@webhook_routes.get("/", response_description = 'Catch payment webhook', status_code = 200, response_model = CheckTransaction)
+@webhook_routes.get("/", response_description = 'Check payment', status_code = 200, response_model = CheckTransaction)
 async def check_successful_transaction(payment_description: str = Query(..., description = 'Payment description')):
     return await check_transferred(payment_description)
