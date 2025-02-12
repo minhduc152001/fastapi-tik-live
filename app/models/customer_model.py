@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -8,7 +8,7 @@ class CustomerBase(BaseModel):
     customer_tiktok_id: str
     customer_name: str
     profile_picture_url: str
-    phone: str | None = None
+    phone: List[str] = ()
     address: str | None = None
     created_at: datetime
     updated_at: datetime
@@ -18,7 +18,7 @@ class CustomerBaseResponse(BaseModel):
     customer_tiktok_id: str
     customer_name: str
     profile_picture_url: str
-    phone: str | None = None
+    phone: List[str] = ()
     address: str | None
     created_at: datetime
     updated_at: datetime
@@ -36,5 +36,10 @@ class GlobalCustomerResponse(CustomerBaseResponse):
     pass
 
 class CustomerUpdate(BaseModel):
+    customer_user_id: str
+    customer_tiktok_id: str
+    from_live_of_tiktok_id: str
+    customer_name: str
+    profile_picture_url: str
     phone: Optional[str] = None
     address: Optional[str] = None

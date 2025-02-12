@@ -1,6 +1,7 @@
 from datetime import datetime
 from datetime import timedelta
 from bson import ObjectId
+from fastapi import HTTPException
 
 from app.config.database import balance_movements_collection, invoices_collection, qr_collection, users_collection, \
     sms_collection
@@ -105,6 +106,10 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
         bank_code = 'VCB'
     msg = data.msg
     transaction = parse_transaction(bank_code, msg)
+
+    # If format HoaDon___ not existed -> throw e
+    if "HoaDon" not in msg:
+        raise HTTPException(400, f"The description does not contain HoaDon: {bank_code} - {msg}.")
 
     # Store balance changes
     balance_movements_collection.insert_one(transaction)
