@@ -54,23 +54,6 @@ async def start_background_tasks():
 @app.on_event("startup")
 async def startup_event():
     await start_background_tasks()
-    # Uncomment in the next push
-    local_customers_collection.update_many(
-        {"phone": None},
-        {"$set": {"phone": []}}
-    )
-    global_customers_collection.update_many(
-        {"phone": None},
-        {"$set": {"phone": []}}
-    )
-    local_customers_collection.update_many(
-        {"phone": {"$type": "string"}},
-        [{"$set": {"phone": {"$cond": {"if": {"$eq": ["$phone", None]}, "then": [], "else": ["$phone"]}}}}]
-    )
-    global_customers_collection.update_many(
-        {"phone": {"$type": "string"}},
-        [{"$set": {"phone": {"$cond": {"if": {"$eq": ["$phone", None]}, "then": [], "else": ["$phone"]}}}}]
-    )
 
 @app.get("/", tags=["root"])
 async def root():
