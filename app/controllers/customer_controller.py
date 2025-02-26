@@ -1,10 +1,11 @@
 from fastapi import HTTPException
 from jose import JWTError
 
+from app.middlewares.auth_middleware import auth_middleware
 from app.models.customer_model import CustomerUpdate
 from app.services.auth_service import decode_access_token, get_user_by_email
-from app.services.customer_service import update_customer_service
-
+from app.services.customer_service import update_customer_service, get_local_customer_service, \
+    get_global_customer_service
 
 async def update_customer(token: str, update_data: CustomerUpdate):
     try:
@@ -15,3 +16,11 @@ async def update_customer(token: str, update_data: CustomerUpdate):
     if not user:
         raise HTTPException(status_code = 404, detail = "User not found")
     await update_customer_service(str(user.get('_id')), update_data)
+
+async def get_local_customer(token: str, customer_user_id: str, from_live_of_tiktok_id: str):
+    await auth_middleware(token = token)
+    return await get_local_customer_service(customer_user_id, from_live_of_tiktok_id)
+
+async def get_global_customer(token: str, customer_user_id: str):
+    await auth_middleware(token = token)
+    return await get_global_customer_service(customer_user_id)

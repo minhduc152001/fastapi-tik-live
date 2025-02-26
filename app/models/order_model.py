@@ -13,7 +13,7 @@ class OrderDetail(BaseModel):
     customer_tiktok_id: str
     customer_name: str
     phone: List[str] | None
-    address: str | None
+    address: List[str] | None
     user_id: str
     live_started_at: datetime
     live_title: str

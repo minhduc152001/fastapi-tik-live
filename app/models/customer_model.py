@@ -9,7 +9,7 @@ class CustomerBase(BaseModel):
     customer_name: str
     profile_picture_url: str
     phone: List[str] = ()
-    address: str | None = None
+    address: List[str] = ()
     created_at: datetime
     updated_at: datetime
 class CustomerBaseResponse(BaseModel):
@@ -19,7 +19,7 @@ class CustomerBaseResponse(BaseModel):
     customer_name: str
     profile_picture_url: str
     phone: List[str] = ()
-    address: str | None
+    address: List[str] = ()
     created_at: datetime
     updated_at: datetime
 
@@ -43,3 +43,23 @@ class CustomerUpdate(BaseModel):
     profile_picture_url: str
     phone: Optional[str] = None
     address: Optional[str] = None
+
+class LocalCustomerModel(BaseModel):
+    id: str
+    customer_user_id: str
+    customer_tiktok_id: str
+    customer_name: str
+    profile_picture_url: str
+    user_id: str
+    from_live_of_tiktok_id: str
+    phone: List[str]
+    address: List[str]
+
+class GlobalCustomerModel(BaseModel):
+    id: str
+    customer_user_id: str
+    customer_tiktok_id: str
+    customer_name: str
+    profile_picture_url: str
+    phone: List[str]
+    address: List[str]

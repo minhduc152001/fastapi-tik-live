@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Header, Path
+from fastapi import APIRouter, Header, Path, Query
 
-from app.controllers.customer_controller import update_customer
-from app.models.customer_model import CustomerUpdate
+from app.controllers.customer_controller import update_customer, get_local_customer, get_global_customer
+from app.models.customer_model import CustomerUpdate, LocalCustomerModel, GlobalCustomerModel
 
 customer_router = APIRouter()
 
@@ -9,3 +9,20 @@ customer_router = APIRouter()
 async def update_customer_info(update_data: CustomerUpdate, authorization: str = Header(...)):
     token = authorization.split(" ")[1]
     return await update_customer(token, update_data)
+
+@customer_router.get("/local", response_model=LocalCustomerModel, response_description="Get local customer info", status_code=200)
+async def get_local_customer_route(
+    customer_user_id: str = Query(..., description="Customer User ID"),
+    from_live_of_tiktok_id: str = Query(..., description="Tiktok Live ID"),
+    authorization: str = Header(...)
+):
+    token = authorization.split(" ")[1]
+    return await get_local_customer(token, customer_user_id, from_live_of_tiktok_id)
+
+@customer_router.get("/global", response_model=GlobalCustomerModel, response_description="Get global customer info", status_code=200)
+async def get_global_customer_route(
+    customer_user_id: str = Query(..., description="Customer User ID"),
+    authorization: str = Header(...)
+):
+    token = authorization.split(" ")[1]
+    return await get_global_customer(token, customer_user_id)
