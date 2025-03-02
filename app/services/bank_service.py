@@ -25,7 +25,7 @@ async def list_bank_service():
 async def update_bank_service(bank_id: str, values: BankModel):
     update_data = {k: v for k, v in values.model_dump().items() if v is not None}
     if not update_data:
-        raise HTTPException(status_code = 400, detail = "No fields to update provided")
+        raise HTTPException(status_code = 400, detail = "Hãy cung cấp thông tin cần cập nhật")
     banks_collection.find_one_and_update({ "_id": ObjectId(bank_id) }, { "$set": update_data })
     updated_bank = banks_collection.find_one({ "_id": ObjectId(bank_id) })
     updated_bank['id'] = str(updated_bank.get("_id"))

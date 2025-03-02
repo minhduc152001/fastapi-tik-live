@@ -14,7 +14,7 @@ async def create_qr_code_service(user_id: str, details: QRRequest):
     try:
         details_dict["bank_name"] = bank_names[details.bank_code]
     except KeyError:
-        raise HTTPException(400, "No bank code")
+        raise HTTPException(400, "Thiếu mã ngân hàng (VCB, ACB...)")
     details_dict["user_id"] = user_id
     details_dict["payment_description"] = None
     details_dict["created_at"] = datetime.now()

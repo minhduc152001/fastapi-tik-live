@@ -9,9 +9,9 @@ async def list_rooms(token: str):
     try:
         payload = decode_access_token(token)
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=401, detail="Mã token không hợp lệ hoặc hết hạn.")
     user = get_user_by_email(payload["email"])
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Không tìm thấy người dùng.")
     rooms = await list_room_service(payload["id"])
     return rooms

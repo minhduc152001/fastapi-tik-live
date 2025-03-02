@@ -40,12 +40,12 @@ async def get_me(token: str):
     try:
         payload = decode_access_token(token)
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=401, detail="Mã token không hợp lệ hoặc hết hạn.")
 
     # Fetch user details from the database
     user = get_user_by_email(payload["email"])
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Không tìm thấy người dùng")
 
     return UserResponse(
         id= str(user["_id"]),
@@ -61,9 +61,9 @@ async def list_users(token: str):
     try:
         payload = decode_access_token(token)
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=401, detail="Mã token không hợp lệ hoặc hết hạn.")
     if payload["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Access forbidden: Admins only")
+        raise HTTPException(status_code=403, detail="Chỉ ADMIN mới có quyền này.")
 
     users = await get_users()
     return users
@@ -72,7 +72,7 @@ async def update_user(token: str, user_update: UserUpdateRequest):
     try:
         payload = decode_access_token(token)
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=401, detail="Mã token không hợp lệ hoặc hết hạn.")
 
     user_id = payload["id"]
 

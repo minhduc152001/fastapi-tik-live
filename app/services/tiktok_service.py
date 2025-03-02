@@ -105,7 +105,7 @@ async def connect_live_service(tiktok_id: str, user_id: str, background_tasks: B
     # Check if current ID is online to raise an error
     another_room_live = await check_room_online(tiktok_id, user_id)
     if another_room_live:
-        raise HTTPException(status_code=400, detail="You just have turn this room online!")
+        raise HTTPException(status_code=400, detail=f"Kênh {tiktok_id} đang có một buổi phát trực tiếp khác!")
 
     client: TikTokLiveClient = TikTokLiveClient(unique_id=f"@{tiktok_id}")
     live_handler = LiveTikTokHandler()
@@ -113,19 +113,19 @@ async def connect_live_service(tiktok_id: str, user_id: str, background_tasks: B
     try:
         is_live = await client.is_live()
         if not is_live:
-            raise HTTPException(status_code=400, detail="Live stream is currently offline")
+            raise HTTPException(status_code=400, detail=f"Kênh {tiktok_id} đang không phát trực tiếp")
 
         print(f"{tiktok_id} is live!")
 
         # Add the event listener task to background tasks
         background_tasks.add_task(start_event_listeners, client, live_handler, user_id, tiktok_id)
 
-        message = "Successfully connected to the live stream"
+        message = "Kết nối thành công tới buổi phát trực tiếp"
         return LiveConnectResponse(is_live=is_live, message=message)
 
     except Exception as e:
         print(f"Error connecting to live: {e}")
-        raise HTTPException(status_code=500, detail=f"{e}")
+        raise HTTPException(status_code=500, detail=f"{tiktok_id}: đang có lỗi xảy ra. Hãy thử lại!")
 
 
 async def check_live_rooms():

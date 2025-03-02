@@ -115,7 +115,7 @@ async def get_local_customer_service(customer_user_id: str, from_live_of_tiktok_
     customer = local_customers_collection.find_one({ "customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id })
     # Handle not found
     if not customer:
-        raise HTTPException(status_code = 404, detail = "Customer not found")
+        raise HTTPException(status_code = 404, detail = "Không tìm thấy khách hàng")
     # Convert ObjectId to string for `_id`
     customer["id"] = str(customer.pop("_id"))
     return customer
@@ -124,7 +124,7 @@ async def get_global_customer_service(customer_user_id: str):
     customer = global_customers_collection.find_one({ "customer_user_id": customer_user_id })
     # Handle not found
     if not customer:
-        raise HTTPException(status_code = 404, detail = "Customer not found")
+        raise HTTPException(status_code = 404, detail = "Không tìm thấy khách hàng")
     # Convert ObjectId to string for `_id`
     customer["id"] = str(customer.pop("_id"))
     return customer

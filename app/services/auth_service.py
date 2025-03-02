@@ -11,7 +11,7 @@ from app.models.user_model import User, get_password_hash, verify_password, crea
 async def create_user(user: dict):
     # Check if email or username already exists
     if users_collection.find_one({"email": user.get("email")}):
-        raise HTTPException(status_code=400, detail="Email already exists")
+        raise HTTPException(status_code=400, detail="Email đã tồn tại")
 
     # Hash the password
     hashed_password = get_password_hash(user.get("password"))
@@ -31,11 +31,11 @@ async def create_user(user: dict):
 async def authenticate_user(email: str, password: str):
     user = users_collection.find_one({"email": email})
     if not user:
-        raise HTTPException(status_code=400, detail="User not found")
+        raise HTTPException(status_code=400, detail="Không tìm thấy người dùng.")
 
     # Verify password
     if not verify_password(password, user["password"]):
-        raise HTTPException(status_code=400, detail="Invalid password")
+        raise HTTPException(status_code=400, detail="Sai mật khẩu.")
 
     return user
 
@@ -53,7 +53,7 @@ def decode_access_token(token: str):
 def get_user_by_email(email: str):
     user = users_collection.find_one({"email": email})
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Không tìm thấy người dùng.")
     return user
 
 async def get_users():
@@ -77,11 +77,11 @@ async def get_users():
 def update_user_info(user_id: str, user_update: UserUpdateRequest):
     user = users_collection.find_one({"_id": ObjectId(user_id)})
     if not user:
-        raise HTTPException(status_code = 404, detail = "User not found")
+        raise HTTPException(status_code = 404, detail = "Không tìm thấy người dùng.")
 
     update_data = {k: v for k, v in user_update.model_dump().items() if v is not None}
     if not update_data:
-        raise HTTPException(status_code = 400, detail = "No fields to update provided")
+        raise HTTPException(status_code = 400, detail = "Hãy gửi thông tin cần cập nhật.")
 
     # Handle TikTok IDs update
     if "tiktok_ids" in update_data:
@@ -92,7 +92,7 @@ def update_user_info(user_id: str, user_update: UserUpdateRequest):
 
         # Check array size against max slots
         if len(new_tiktok_ids) > max_slots:
-            raise HTTPException(status_code = 403, detail = f"Exceeds maximum TikTok ID slots ({max_slots})")
+            raise HTTPException(status_code = 403, detail = f"Vượt quá giới hạn số lượng TikTok ID ({max_slots})")
 
         # Check global uniqueness
         for tiktok_id in new_tiktok_ids:
@@ -100,7 +100,7 @@ def update_user_info(user_id: str, user_update: UserUpdateRequest):
                 existing_user = users_collection.find_one({"tiktok_ids": tiktok_id})
                 if existing_user and str(existing_user["_id"]) != user_id:
                     raise HTTPException(status_code = 409,
-                                        detail = f"TikTok ID '{tiktok_id}' already in use by another user"
+                                        detail = f"TikTok ID '{tiktok_id}' đã được sử dụng bởi người dùng khác"
                                         )
 
         # Analyze changes
@@ -121,12 +121,12 @@ def update_user_info(user_id: str, user_update: UserUpdateRequest):
         is_within_3_days = last_updated and (datetime.now() - last_updated) < timedelta(days = 3)
         if is_within_3_days and updates > 0:
             raise HTTPException(status_code = 403,
-                                detail = "Cannot update existing TikTok IDs within 3 days of last update"
+                                detail = "Không thể cập nhật TikTok ID trong vòng 3 ngày"
                                 )
 
         # After 3 days, allow only one update
         if not is_within_3_days and updates > 1:
-            raise HTTPException(status_code = 403, detail = "Only one TikTok ID can be updated at a time after 3 days")
+            raise HTTPException(status_code = 403, detail = "Chỉ một TikTOK ID được cập nhật cùng lúc")
 
         # Update last_tiktok_ids_updated_at only for updates, not adds/removes
         if updates > 0:
@@ -154,12 +154,12 @@ def update_user_info(user_id: str, user_update: UserUpdateRequest):
             max_tiktok_id_slots = updated_user.get("max_tiktok_id_slots", 3)
         )
     else:
-        raise HTTPException(status_code = 404, detail = "User not found")
+        raise HTTPException(status_code = 404, detail = "Không tìm thấy người dùng.")
 
 def update_admin_user_info(user_id: str, user_update: AdminUpdateUserRequest):
     update_data = {k: v for k, v in user_update.model_dump().items() if v is not None}
     if not update_data:
-        raise HTTPException(status_code=400, detail="No fields to update provided")
+        raise HTTPException(status_code=400, detail="Hãy cung cấp thông tin cần cập nhật")
 
     users_collection.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
 
@@ -175,7 +175,7 @@ def update_admin_user_info(user_id: str, user_update: AdminUpdateUserRequest):
             created_at=updated_user["created_at"],
         )
     else:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Không tìm thấy người dùng")
 
 async def delete_user_service(user_id: str):
     return users_collection.delete_one({"_id": ObjectId(user_id)})

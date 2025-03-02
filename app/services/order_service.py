@@ -12,10 +12,10 @@ async def create_order_service(order: Order, user_id: str):
     order_dict["updated_at"] = datetime.now()
     global_customer = global_customers_collection.find_one({"customer_user_id": order_dict["customer_user_id"]})
     if not global_customer:
-        raise HTTPException(status_code=400, detail="Customer not found")
+        raise HTTPException(status_code=400, detail="Không tìm thấy khách hàng")
     room = rooms_collection.find_one({"_id": ObjectId(order_dict["room_id"])})
     if not room:
-        raise HTTPException(status_code=400, detail="Room not found")
+        raise HTTPException(status_code=400, detail="Buổi phát trực tiếp này không còn")
     order_dict["customer_tiktok_id"] = global_customer.get("customer_tiktok_id")
     order_dict["customer_name"] = global_customer.get("customer_name")
     order_dict["phone"] = global_customer.get("phone")
@@ -35,7 +35,7 @@ async def create_order_service(order: Order, user_id: str):
 async def get_order_service(order_id: str, user_id: str):
     order = order_collection.find_one({'_id': ObjectId(order_id), user_id: user_id})
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise HTTPException(status_code=404, detail="Đơn hàng này không tồn tại")
     return OrderDetail(
         id = str(order["_id"]),
         customer_user_id = order["customer_user_id"],
@@ -79,4 +79,4 @@ async def get_all_order_service(user_id: str, condition: Optional[dict] = None) 
         ]
     except Exception as e:
         print(f"Error listing orders: {e}")
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving orders")
+        raise HTTPException(status_code=500, detail="Có lỗi xảy ra trong quá trình lấy dữ liệu. Hãy thử lại!")

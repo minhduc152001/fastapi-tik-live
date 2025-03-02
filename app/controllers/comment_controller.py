@@ -12,12 +12,12 @@ async def list_comments(token:str, room_id: str, customer_user_id: Optional[str]
     try:
         payload = decode_access_token(token)
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=401, detail="Mã token không hợp lệ hoặc hết hạn.")
     user = get_user_by_email(payload["email"])
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     list_rooms = await list_room_service(payload["id"])
     if room_id not in [room.id for room in list_rooms]:
-        raise HTTPException(status_code = 403, detail = "Not included in your Rooms")
+        raise HTTPException(status_code = 403, detail = "Không tìm thấy ID phòng trong dữ liệu của bạn")
     comments = await list_comments_by_room_id(room_id, customer_user_id, skip, limit)
     return comments

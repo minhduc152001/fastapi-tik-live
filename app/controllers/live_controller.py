@@ -7,12 +7,12 @@ async def connect_live(token: str, tiktok_id: str, background_tasks: BackgroundT
     try:
         payload = decode_access_token(token)
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=401, detail="Mã token không hợp lệ hoặc hết hạn.")
     user = get_user_by_email(payload["email"])
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="Không tìm thấy người dùng")
     if not tiktok_id in user["tiktok_ids"]:
-        raise HTTPException(status_code=403, detail="Not include this TikTok ID")
+        raise HTTPException(status_code=403, detail="Bạn không có tiktok ID này.")
 
     result = await connect_live_service(tiktok_id, payload["id"], background_tasks)
     return result

@@ -11,10 +11,10 @@ async def update_customer(token: str, update_data: CustomerUpdate):
     try:
         payload = decode_access_token(token)
     except JWTError:
-        raise HTTPException(status_code = 401, detail = "Invalid or expired token")
+        raise HTTPException(status_code = 401, detail = "Mã token không hợp lệ hoặc hết hạn.")
     user = get_user_by_email(payload["email"])
     if not user:
-        raise HTTPException(status_code = 404, detail = "User not found")
+        raise HTTPException(status_code = 404, detail = "Không tìm thấy người dùng")
     await update_customer_service(str(user.get('_id')), update_data)
 
 async def get_local_customer(token: str, customer_user_id: str, from_live_of_tiktok_id: str):
