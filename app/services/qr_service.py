@@ -6,8 +6,8 @@ from fastapi import HTTPException
 
 from app.config.database import qr_collection, users_collection
 from app.constant.enum import bank_names
-from app.models.qr_model import QRRequest, QRResponse
-
+from app.constant.fixedVar import PRICE_PER_TIKTOK_ID
+from app.models.qr_model import QRRequest
 
 async def create_qr_code_service(user_id: str, details: QRRequest):
     details_dict = details.model_dump()
@@ -18,7 +18,10 @@ async def create_qr_code_service(user_id: str, details: QRRequest):
     details_dict["user_id"] = user_id
     details_dict["payment_description"] = None
     details_dict["created_at"] = datetime.now()
-    details_dict["total_amount"] = details.amount_per_month * details.subscription_months
+    if details.total_month_cost > 0 and details.total_tiktok_ids == 1:
+        details_dict["total_amount"] = details.total_month_cost
+    else:
+        details_dict["total_amount"] = details.total_tiktok_ids * PRICE_PER_TIKTOK_ID
     new_qr_id = qr_collection.insert_one(details_dict).inserted_id
     payment_description = f"HoaDon{new_qr_id}"
     qr = qr_collection.find_one_and_update({"_id": ObjectId(new_qr_id)}, {"$set": {"payment_description": payment_description}})
@@ -36,8 +39,9 @@ async def list_qr_codes_service():
             "id": str(qr_code["_id"]),
             "bank_code": qr_code["bank_code"],
             "account_number": qr_code["account_number"],
-            "amount_per_month": qr_code["amount_per_month"],
-            "subscription_months": qr_code["subscription_months"],
+            "total_month_cost": qr_code["total_month_cost"],
+            "total_months": qr_code["total_months"],
+            "total_tiktok_ids": qr_code["total_tiktok_ids"],
             "bank_name": qr_code["bank_name"],
             "payment_description": qr_code["payment_description"],
             "created_at": qr_code["created_at"],

@@ -114,27 +114,39 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
     # Store balance changes
     balance_movements_collection.insert_one(transaction)
 
-    # Store invoice
     invoice_id = extract_invoice_id(msg)
     qr = qr_collection.find_one({"payment_description": invoice_id})
     if not qr:
         raise Exception("No payment description found for invoice id: {}".format(invoice_id))
 
-    month_usage = qr.get("subscription_months")
-    # Update usage time
-    new_expiry_date = datetime.now() + timedelta(days=30 * month_usage)
-    user = users_collection.find_one_and_update(
-        {"_id": ObjectId(qr.get("user_id"))},
-        { "$set": {"subscription_expired_at": new_expiry_date}}
-    )
+    # Store invoice
+    update_fields = {}
+    # Handle subscription_expired_at
+    month_usage = qr.get("total_months")
+    user = users_collection.find_one({"_id": ObjectId(qr.get("user_id"))})
+    if month_usage and month_usage > 0:  # Check if exists and is positive
+        new_expiry_date = datetime.now() + timedelta(days = 30 * month_usage)
+        update_fields["subscription_expired_at"] = new_expiry_date
+
+    # Handle total_tiktok_ids
+    additional_tiktok_ids = qr.get("total_tiktok_ids")
+    if additional_tiktok_ids:  # Check if exists and non-zero
+        if user:
+            current_slots = user.get("max_tiktok_id_slots", 0)  # Default to 5 if missing
+            new_slots = current_slots + additional_tiktok_ids
+            update_fields["max_tiktok_id_slots"] = new_slots
+
+    # Perform update only if there are fields to update
+    users_collection.find_one_and_update({"_id": ObjectId(qr.get("user_id"))}, {"$set": update_fields})
     if not user:
         raise Exception("No user found for user id: {}".format(qr.get("user_id")))
     invoices_collection.insert_one({
         "invoice_id": invoice_id,
         "customer": user.get("email"),
         "vendor": "tatech",
-        "amount_per_month": qr.get("amount_per_month"),
-        "subscription_months": month_usage,
+        "total_months": month_usage,
+        "total_month_cost": qr.get("total_month_cost"),
+        "total_tiktok_ids": qr.get("total_tiktok_ids"),
         "total_amount": qr.get("total_amount"),
         "VAT": "0%",
         "created_at": datetime.now(),

@@ -16,6 +16,8 @@ class User(BaseModel):
     password: str
     tiktok_ids: List[str] = ()
     role: str = 'user'
+    max_tiktok_id_slots: Optional[int] = None
+    subscription_expired_at: Optional[datetime] = None
 
 class UserResponse(BaseModel):
     id: str
@@ -25,6 +27,8 @@ class UserResponse(BaseModel):
     role: str
     subscription_expired_at: datetime = None
     created_at: datetime
+    last_tiktok_ids_updated_at: Optional[datetime] = None
+    max_tiktok_id_slots: int = None
 
 class UserSignUp(BaseModel):
     email: EmailStr

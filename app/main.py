@@ -1,9 +1,6 @@
 import asyncio
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.config.database import local_customers_collection, global_customers_collection
 from app.routes.auth_routes import auth_router
 from app.routes.balance_routes import balance_router
 from app.routes.bank_routes import bank_routes
@@ -19,7 +16,7 @@ from app.routes.sms_routes import sms_router
 from app.routes.webhook_routes import webhook_routes
 from app.routes.ws_routes import ws_router
 from app.services.customer_service import process_pending_customers
-from app.services.tiktok_service import delete_old_records
+from app.services.tiktok_service import delete_old_records, check_live_rooms
 
 app = FastAPI()
 
@@ -51,26 +48,11 @@ app.include_router(ws_router, prefix="/api/v1/ws", tags=["ws"])
 async def start_background_tasks():
     asyncio.create_task(process_pending_customers())
     asyncio.create_task(delete_old_records())
+    loop = asyncio.get_event_loop()
+    loop.create_task(check_live_rooms())
 @app.on_event("startup")
 async def startup_event():
     await start_background_tasks()
-    # Uncomment in the next push
-    local_customers_collection.update_many(
-        {"address": None},
-        {"$set": {"address": []}}
-    )
-    global_customers_collection.update_many(
-        {"address": None},
-        {"$set": {"address": []}}
-    )
-    local_customers_collection.update_many(
-        {"address": {"$type": "string"}},
-        [{"$set": {"address": {"$cond": {"if": {"$eq": ["$address", None]}, "then": [], "else": ["$address"]}}}}]
-    )
-    global_customers_collection.update_many(
-        {"address": {"$type": "string"}},
-        [{"$set": {"address": {"$cond": {"if": {"$eq": ["$address", None]}, "then": [], "else": ["$address"]}}}}]
-    )
 
 @app.get("/", tags=["root"])
 async def root():

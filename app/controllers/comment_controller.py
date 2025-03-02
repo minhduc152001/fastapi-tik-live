@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import HTTPException
 from jose import JWTError
 
@@ -6,7 +8,7 @@ from app.services.comment_service import list_comments_by_room_id
 from app.services.room_service import list_room_service
 
 
-async def list_comments(token:str, room_id: str):
+async def list_comments(token:str, room_id: str, customer_user_id: Optional[str] = None, skip: Optional[int] = None, limit: Optional[int] = None):
     try:
         payload = decode_access_token(token)
     except JWTError:
@@ -17,5 +19,5 @@ async def list_comments(token:str, room_id: str):
     list_rooms = await list_room_service(payload["id"])
     if room_id not in [room.id for room in list_rooms]:
         raise HTTPException(status_code = 403, detail = "Not included in your Rooms")
-    comments = await list_comments_by_room_id(room_id)
+    comments = await list_comments_by_room_id(room_id, customer_user_id, skip, limit)
     return comments

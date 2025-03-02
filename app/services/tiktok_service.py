@@ -126,3 +126,49 @@ async def connect_live_service(tiktok_id: str, user_id: str, background_tasks: B
     except Exception as e:
         print(f"Error connecting to live: {e}")
         raise HTTPException(status_code=500, detail=f"{e}")
+
+
+async def check_live_rooms():
+    while True:
+        try:
+            print(f"Checking live rooms at {datetime.now()}")
+
+            # Get all rooms where is_live is true
+            live_rooms = rooms_collection.find({"is_live": True})
+
+            for room in live_rooms:
+                room_id = str(room["_id"])
+                tiktok_id = room["tiktok_id"]
+
+                # Check for comments in the last 30 minutes
+                thirty_minutes_ago = datetime.now() - timedelta(minutes = 30)
+                recent_comments = comments_collection.count_documents({
+                    "room_id": room_id,
+                    "created_at": {"$gte": thirty_minutes_ago}
+                }
+                )
+
+                if recent_comments == 0:  # No new comments in the last 30 minutes
+                    # Check TikTok live status
+                    client = TikTokLiveClient(unique_id = f"@{tiktok_id}")
+                    is_live = await client.is_live()
+
+                    if not is_live:
+                        # Update room status
+                        rooms_collection.update_one(
+                            {"_id": room["_id"]},
+                            {
+                                "$set": {
+                                    "is_live": False,
+                                    "ended_at": datetime.now(),
+                                    "updated_at": datetime.now()
+                                }
+                            }
+                        )
+                        print(f"Room {room_id} marked as offline")
+
+        except Exception as e:
+            print(f"Error in check_live_rooms: {str(e)}")
+
+        # Wait 30 minutes before the next check
+        await asyncio.sleep(30 * 60)  # 30 minutes in seconds

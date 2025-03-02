@@ -1,13 +1,12 @@
 from datetime import datetime
-
 from pydantic import BaseModel
-
 
 class QRRequest(BaseModel):
     bank_code: str
     account_number: str
-    amount_per_month: int
-    subscription_months: int
+    total_tiktok_ids: int = 1
+    total_month_cost: int = 0
+    total_months: int = 0
 
 class QRResponse(BaseModel):
     bank_name: str

@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel
 
 class Comment(BaseModel):
@@ -27,3 +29,5 @@ class CommentResponse(BaseModel):
     profile_picture_url: str
     check_store_customer: bool
     created_at: datetime
+    has_global_phone: Optional[bool] = None
+    has_local_phone: Optional[bool] = None
