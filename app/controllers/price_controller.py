@@ -1,11 +1,12 @@
 from app.middlewares.auth_middleware import auth_admin_middleware
+from app.middlewares.auth_middleware import auth_middleware
 from app.models.price_model import PriceRequest
 from app.services.price_service import list_prices_service, create_price_service, update_price_service, \
     delete_price_service
 
 
 async def list_prices(token: str):
-    await auth_admin_middleware(token)
+    await auth_middleware(token)
     return await list_prices_service()
 
 async def create_price(token: str, data: PriceRequest):
