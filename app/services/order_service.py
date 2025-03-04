@@ -108,7 +108,7 @@ async def get_all_order_service(user_id: str, condition: Optional[dict] = None) 
         query = condition or {}
         query["user_id"] = user_id
         cursor = order_collection.find(query)
-        orders = await cursor.to_list(length = None)
+        orders = cursor.to_list(length = None)
 
         return [
             OrderDetail(
