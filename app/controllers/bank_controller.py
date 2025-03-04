@@ -1,4 +1,4 @@
-from app.middlewares.auth_middleware import auth_admin_middleware
+from app.middlewares.auth_middleware import auth_admin_middleware, auth_middleware
 from app.models.bank_model import CreateBankModel, BankModel
 from app.services.bank_service import create_bank_service, list_bank_service, delete_bank_service, update_bank_service
 
@@ -8,7 +8,7 @@ async def create_bank(token: str, data: CreateBankModel):
     return await create_bank_service(data)
 
 async def list_banks(token: str):
-    await auth_admin_middleware(token=token)
+    await auth_middleware(token=token)
     return await list_bank_service()
 
 async def delete_bank(token: str, bank_id: str):
