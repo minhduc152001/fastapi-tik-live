@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional, List
 
 from pydantic import BaseModel
@@ -63,3 +64,11 @@ class GlobalCustomerModel(BaseModel):
     profile_picture_url: str
     phone: List[str]
     address: List[str]
+
+class FieldName(str, Enum):
+    PHONE = "phone"
+    ADDRESS = "address"
+
+class DeleteRequest(BaseModel):
+    field: FieldName
+    elements: List[str]

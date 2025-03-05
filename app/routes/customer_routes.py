@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Header, Path, Query
 
-from app.controllers.customer_controller import update_customer, get_local_customer, get_global_customer
-from app.models.customer_model import CustomerUpdate, LocalCustomerModel, GlobalCustomerModel
+from app.controllers.customer_controller import update_customer, get_local_customer, get_global_customer, \
+    remove_customer_elements
+from app.models.customer_model import CustomerUpdate, LocalCustomerModel, GlobalCustomerModel, DeleteRequest
 
 customer_router = APIRouter()
 
@@ -26,3 +27,15 @@ async def get_global_customer_route(
 ):
     token = authorization.split(" ")[1]
     return await get_global_customer(token, customer_user_id)
+
+@customer_router.put("/local-customers/{customer_user_id}/{from_live_of_tiktok_id}/remove-elements",
+         response_model=LocalCustomerModel,
+         response_description="Updated customer with removed elements (phone/address)")
+async def remove_elements(
+    customer_user_id: str,
+    from_live_of_tiktok_id: str,
+    request: DeleteRequest,
+    authorization: str = Header(...)
+):
+    token = authorization.split(" ")[1]
+    return await remove_customer_elements(token, request, customer_user_id, from_live_of_tiktok_id)

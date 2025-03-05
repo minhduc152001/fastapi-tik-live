@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from pymongo.errors import DuplicateKeyError
 
 from app.config.database import comments_collection, local_customers_collection, global_customers_collection
-from app.models.customer_model import CustomerUpdate
+from app.models.customer_model import CustomerUpdate, DeleteRequest, LocalCustomerModel
 from app.services.global_customer_service import update_global_customer_service
 from app.services.local_customer_service import update_local_customer_service
 
@@ -109,7 +109,7 @@ async def update_customer_service(user_id: str, update_data: CustomerUpdate):
         update_operations["$set"].update(update_data_dict)
 
     await update_global_customer_service({"customer_user_id": update_data_dict.get("customer_user_id")}, update_operations)
-    await update_local_customer_service({"customer_user_id": update_data_dict.get("customer_user_id"), "user_id": user_id}, update_operations)
+    await update_local_customer_service({"customer_user_id": update_data_dict.get("customer_user_id"), "from_live_of_tiktok_id": update_data_dict["from_live_of_tiktok_id"]}, update_operations)
 
 async def get_local_customer_service(customer_user_id: str, from_live_of_tiktok_id: str):
     customer = local_customers_collection.find_one({ "customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id })
@@ -128,3 +128,46 @@ async def get_global_customer_service(customer_user_id: str):
     # Convert ObjectId to string for `_id`
     customer["id"] = str(customer.pop("_id"))
     return customer
+
+async def remove_customer_elements_service(request: DeleteRequest, customer_user_id: str, from_live_of_tiktok_id: str):
+    customer = local_customers_collection.find_one({"customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id})
+    if not customer:
+        raise HTTPException(status_code = 404, detail = "Customer not found")
+
+    # Get current values
+    current_values = customer.get(request.field, [])
+    # Remove requested elements
+    updated_values = [item for item in current_values if item not in request.elements]
+    # If no changes needed, return current document
+    if updated_values == current_values:
+        return LocalCustomerModel(
+            id = str(customer["_id"]),
+            customer_user_id = customer["customer_user_id"],
+            customer_tiktok_id = customer["customer_tiktok_id"],
+            customer_name = customer["customer_name"],
+            profile_picture_url = customer["profile_picture_url"],
+            user_id = customer["user_id"],
+            from_live_of_tiktok_id = customer["from_live_of_tiktok_id"],
+            phone = customer["phone"],
+            address = customer["address"]
+        )
+    # Update the document
+    update_result = local_customers_collection.update_one(
+        {"customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id},
+        {"$set": {request.field: updated_values}}
+    )
+    if update_result.modified_count == 0:
+        raise HTTPException(status_code = 500, detail = "Failed to update customer")
+    # Fetch updated document
+    updated_customer = local_customers_collection.find_one({"customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id})
+    return LocalCustomerModel(
+        id = str(updated_customer["_id"]),
+        customer_user_id = updated_customer["customer_user_id"],
+        customer_tiktok_id = updated_customer["customer_tiktok_id"],
+        customer_name = updated_customer["customer_name"],
+        profile_picture_url = updated_customer["profile_picture_url"],
+        user_id = updated_customer["user_id"],
+        from_live_of_tiktok_id = updated_customer["from_live_of_tiktok_id"],
+        phone = updated_customer["phone"],
+        address = updated_customer["address"]
+    )
