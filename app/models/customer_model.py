@@ -36,6 +36,13 @@ class GlobalCustomer(CustomerBase):
 class GlobalCustomerResponse(CustomerBaseResponse):
     pass
 
+class AddLocalCustomer(BaseModel):
+    customer_user_id: str
+    customer_tiktok_id: str
+    from_live_of_tiktok_id: str
+    customer_name: str
+    profile_picture_url: str
+
 class CustomerUpdate(BaseModel):
     customer_user_id: str
     customer_tiktok_id: str

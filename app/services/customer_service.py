@@ -7,7 +7,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.config.database import comments_collection, local_customers_collection, global_customers_collection, \
     order_collection
-from app.models.customer_model import CustomerUpdate, DeleteRequest, LocalCustomerModel
+from app.models.customer_model import CustomerUpdate, DeleteRequest, LocalCustomerModel, AddLocalCustomer
 from app.services.global_customer_service import update_global_customer_service
 from app.services.local_customer_service import update_local_customer_service
 
@@ -132,6 +132,22 @@ async def update_customer_service(user_id: str, update_data: CustomerUpdate):
 
     await update_global_customer_service({"customer_user_id": update_data_dict.get("customer_user_id")}, update_operations)
     await update_local_customer_service({"customer_user_id": update_data_dict.get("customer_user_id"), "from_live_of_tiktok_id": update_data_dict["from_live_of_tiktok_id"], "user_id": user_id}, update_operations)
+
+async def add_local_customer_service(user_id: str, update_data: AddLocalCustomer):
+    update_data_dict = update_data.model_dump(exclude_unset = True)
+    inserted_customer = local_customers_collection.insert_one({"customer_user_id": update_data_dict.get("customer_user_id"),
+                                           "customer_tiktok_id": update_data_dict["customer_tiktok_id"],
+                                           "customer_name": update_data_dict["customer_name"],
+                                           "profile_picture_url": update_data_dict["profile_picture_url"],
+                                           "from_live_of_tiktok_id": update_data_dict["from_live_of_tiktok_id"],
+                                           "user_id": user_id,
+                                            "phone": [],
+                                            "address": [],
+                                           "created_at": datetime.now(),
+                                           "updated_at": datetime.now()})
+    customer = local_customers_collection.find_one({"_id": ObjectId(inserted_customer.inserted_id)})
+    customer["id"] = str(customer.pop("_id"))
+    return customer
 
 async def get_local_customer_service(customer_user_id: str, from_live_of_tiktok_id: str):
     customer = local_customers_collection.find_one({ "customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id })
