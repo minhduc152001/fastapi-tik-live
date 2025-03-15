@@ -108,6 +108,7 @@ async def connect_live_service(tiktok_id: str, user_id: str, background_tasks: B
         raise HTTPException(status_code=400, detail=f"Kênh {tiktok_id} đang có một buổi phát trực tiếp khác!")
 
     client: TikTokLiveClient = TikTokLiveClient(unique_id=f"@{tiktok_id}")
+    # client.web.set_session_id('72972926786302131211741950985674')
     live_handler = LiveTikTokHandler()
 
     try:
@@ -125,7 +126,7 @@ async def connect_live_service(tiktok_id: str, user_id: str, background_tasks: B
 
     except Exception as e:
         print(f"Error connecting to live: {e}")
-        raise HTTPException(status_code=500, detail=f"{tiktok_id}: đang có lỗi xảy ra. Hãy thử lại!")
+        raise HTTPException(status_code=500, detail=f"{e}")
 
 
 async def check_live_rooms():

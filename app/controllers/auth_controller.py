@@ -16,6 +16,7 @@ async def signup(user):
         phone=new_user["phone"],
         tiktok_ids=new_user.get("tiktok_ids", []),
         role=new_user["role"],
+        max_tiktok_id_slots=new_user.get("max_tiktok_id_slots", 0),
         subscription_expired_at=new_user["subscription_expired_at"] or None,
         created_at = new_user["created_at"],
     )
@@ -49,12 +50,7 @@ async def get_me(token: str):
 
     return UserResponse(
         id= str(user["_id"]),
-        email= user["email"],
-        phone= user["phone"],
-        tiktok_ids= user["tiktok_ids"],
-        role= user["role"],
-        subscription_expired_at = user["subscription_expired_at"],
-        created_at = user["created_at"],
+        **user
     )
 
 async def list_users(token: str):

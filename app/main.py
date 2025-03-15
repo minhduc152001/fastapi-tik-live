@@ -10,6 +10,7 @@ from app.routes.invoice_routes import invoice_router
 from app.routes.live_routes import live_routes
 from app.routes.order_routes import order_router
 from app.routes.price_routes import price_router
+from app.routes.price_tiktok_routes import pricing_tiktok_router
 from app.routes.qr_routes import qr_router
 from app.routes.room_routes import room_routes
 from app.routes.sms_routes import sms_router
@@ -44,6 +45,7 @@ app.include_router(balance_router, prefix="/api/v1/balance-movements", tags=["ad
 app.include_router(invoice_router, prefix="/api/v1/invoices", tags=["admin", "invoices"])
 app.include_router(price_router, prefix="/api/v1/pricing", tags=["admin", "pricing"])
 app.include_router(ws_router, prefix="/api/v1/ws", tags=["ws"])
+app.include_router(pricing_tiktok_router, prefix="/api/v1/pricing-tiktok", tags=["pricing-tiktok"])
 
 async def start_background_tasks():
     asyncio.create_task(process_pending_customers())

@@ -50,6 +50,7 @@ async def handle_tiktok_live(websocket: WebSocket, tiktok_ids: list[str]):
 
     for tiktok_id in tiktok_ids:
         client = TikTokLiveClient(tiktok_id)
+        client.web.set_session_id('72972926786302131211741950985674')
 
         # Use a closure to capture the current tiktok_id
         def make_on_comment_handler(current_tiktok_id):

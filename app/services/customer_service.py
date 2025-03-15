@@ -5,7 +5,8 @@ from bson import ObjectId
 from fastapi import HTTPException
 from pymongo.errors import DuplicateKeyError
 
-from app.config.database import comments_collection, local_customers_collection, global_customers_collection
+from app.config.database import comments_collection, local_customers_collection, global_customers_collection, \
+    order_collection
 from app.models.customer_model import CustomerUpdate, DeleteRequest, LocalCustomerModel
 from app.services.global_customer_service import update_global_customer_service
 from app.services.local_customer_service import update_local_customer_service
@@ -47,14 +48,14 @@ async def process_pending_customers():
                         "customer_tiktok_id": comment["customer_tiktok_id"],
                         "customer_name": comment["customer_name"],
                         "profile_picture_url": comment["profile_picture_url"],
-                        "address": address,
                         "updated_at": datetime.now(),
                     },
                     "$setOnInsert": {  # Only set this if it's a new document
                         "created_at": datetime.now()
                     },
                     "$push": {  # Append new phone numbers to the existing list
-                        "phone": {"$each": phone}
+                        "phone": {"$each": phone},
+                        "address": {"$each": address},
                     }
                 }
                 # Perform the upsert
@@ -87,6 +88,17 @@ async def update_customer_service(user_id: str, update_data: CustomerUpdate):
         else:
             # Add phone number to the array if it doesn't exist
             update_operations["$addToSet"] = {"phone": phone_number}
+            # Update phone in related order
+            order_collection.update_one({
+                "customer_user_id": update_data_dict["customer_user_id"],
+                "user_id": user_id,
+                },
+                {
+                    "$addToSet": {
+                        "phone": phone_number,
+                    }
+                }
+            )
         # Remove the phone field from update_data_dict to avoid conflicts
         del update_data_dict["phone"]
 
@@ -99,6 +111,16 @@ async def update_customer_service(user_id: str, update_data: CustomerUpdate):
         else:
             # Add address to the array if it doesn't exist
             update_operations["$addToSet"] = {"address": address}
+            order_collection.update_one({
+                "customer_user_id": update_data_dict["customer_user_id"],
+                "user_id": user_id,
+            },
+                {
+                    "$addToSet": {
+                        "address": address,
+                    }
+                }
+            )
         # Remove the address field from update_data_dict to avoid conflicts
         del update_data_dict["address"]
 
@@ -109,7 +131,7 @@ async def update_customer_service(user_id: str, update_data: CustomerUpdate):
         update_operations["$set"].update(update_data_dict)
 
     await update_global_customer_service({"customer_user_id": update_data_dict.get("customer_user_id")}, update_operations)
-    await update_local_customer_service({"customer_user_id": update_data_dict.get("customer_user_id"), "from_live_of_tiktok_id": update_data_dict["from_live_of_tiktok_id"]}, update_operations)
+    await update_local_customer_service({"customer_user_id": update_data_dict.get("customer_user_id"), "from_live_of_tiktok_id": update_data_dict["from_live_of_tiktok_id"], "user_id": user_id}, update_operations)
 
 async def get_local_customer_service(customer_user_id: str, from_live_of_tiktok_id: str):
     customer = local_customers_collection.find_one({ "customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id })
