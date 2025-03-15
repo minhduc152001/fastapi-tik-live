@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+import pymongo
 from pymongo.errors import DuplicateKeyError
 
 from app.config.database import comments_collection, global_customers_collection, local_customers_collection
@@ -31,7 +32,7 @@ async def list_comments_by_room_id(room_id: str,
     if customer_user_id:
         query["customer_user_id"] = customer_user_id
 
-    cursor = comments_collection.find(query)
+    cursor = comments_collection.find(query).sort("_id", pymongo.DESCENDING)
 
     # Apply skip if provided
     if skip is not None:

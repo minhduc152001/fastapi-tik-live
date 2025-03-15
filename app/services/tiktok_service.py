@@ -36,8 +36,8 @@ async def delete_old_records():
 async def start_event_listeners(client: TikTokLiveClient, live_handler: object, user_id: str, tiktok_id: str):
     @client.on(ConnectEvent)
     async def on_connect(event: ConnectEvent):
-        title = ""
-        nickname = ""
+        title = "(Không có tiêu đề)"
+        nickname = tiktok_id
         room_info = client.room_info
         if room_info is not None:
             title = room_info.get("title")
@@ -95,7 +95,14 @@ async def start_event_listeners(client: TikTokLiveClient, live_handler: object, 
             },
         )
         print(f"Live of {tiktok_id} ended!")
-    await client.start(fetch_room_info=True)
+
+    # Start client
+    try:
+        await client.start(fetch_room_info=True)
+    except Exception as e:
+        print(f"Error starting client: {str(e)}, trying again...")
+        await client.start()
+
 
 async def connect_live_service(tiktok_id: str, user_id: str, background_tasks: BackgroundTasks):
     class LiveTikTokHandler:
@@ -108,7 +115,7 @@ async def connect_live_service(tiktok_id: str, user_id: str, background_tasks: B
         raise HTTPException(status_code=400, detail=f"Kênh {tiktok_id} đang có một buổi phát trực tiếp khác!")
 
     client: TikTokLiveClient = TikTokLiveClient(unique_id=f"@{tiktok_id}")
-    # client.web.set_session_id('72972926786302131211741950985674')
+    client.web.set_session_id('a2e52d35e8653c7f0f1db3f97d7f7c7e')
     live_handler = LiveTikTokHandler()
 
     try:

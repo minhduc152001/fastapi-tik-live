@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import List
-
+import pymongo
 from bson import ObjectId
 from fastapi import HTTPException
-
 from app.config.database import qr_collection, users_collection
 from app.constant.enum import bank_names
 from app.constant.fixedVar import PRICE_PER_TIKTOK_ID
@@ -33,7 +31,7 @@ async def create_qr_code_service(user_id: str, details: QRRequest):
 
 
 async def list_qr_codes_service():
-    qr_codes = qr_collection.find().to_list(length = None)
+    qr_codes = qr_collection.find().sort("_id", pymongo.DESCENDING).to_list(length = None)
     user_ids = [ObjectId(qr["user_id"]) for qr in qr_codes]
     users = {str(user["_id"]): user.get("email") for user in
             users_collection.find({"_id": {"$in": user_ids}}).to_list(length = None)}

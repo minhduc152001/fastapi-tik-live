@@ -1,10 +1,10 @@
 from typing import List
-
+import pymongo
 from app.config.database import balance_movements_collection
 
 
 async def list_balances_service():
-    balances = balance_movements_collection.find()
+    balances = balance_movements_collection.find().sort("_id", pymongo.ASCENDING)
     balance_list: List[dict] = []
     for balance in balances:
         balance_list.append({
