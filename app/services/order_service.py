@@ -2,8 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from bson import ObjectId
 from fastapi import HTTPException
-from app.config.database import order_collection, global_customers_collection, rooms_collection, \
-    local_customers_collection
+from app.config.database import order_collection, rooms_collection, local_customers_collection
 from app.models.order_model import Order, SubOrder, OrderCreateRequest
 
 
@@ -66,7 +65,8 @@ async def create_order_service(order_request: OrderCreateRequest, user_id: str):
     # Get phone and address from local_customers
     local_customer = local_customers_collection.find_one({
         "customer_tiktok_id": order_dict["customer_tiktok_id"],
-        "from_live_of_tiktok_id": order_dict["from_live_of_tiktok_id"]
+        "from_live_of_tiktok_id": order_dict["from_live_of_tiktok_id"],
+        "user_id": user_id
     }
     )
 

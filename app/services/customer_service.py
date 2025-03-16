@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime
 
-from bson import ObjectId
 from fastapi import HTTPException
 from pymongo.errors import DuplicateKeyError
 
@@ -36,7 +35,7 @@ async def process_pending_customers():
                 try:
                     local_customers_collection.insert_one(local_customer_data)
                 except DuplicateKeyError:
-                    local_customer = local_customers_collection.find_one({"customer_user_id": customer_user_id, "from_live_of_tiktok_id": comment["from_live_of_tiktok_id"]})
+                    local_customer = local_customers_collection.find_one({"customer_user_id": customer_user_id, "from_live_of_tiktok_id": comment["from_live_of_tiktok_id"], "user_id": comment["user_id"]})
                     # ✅ Ensure local_customer is not None before accessing fields
                     if local_customer:
                         phone = local_customer.get("phone", [])  # Use .get() with a default empty list
@@ -135,22 +134,25 @@ async def update_customer_service(user_id: str, update_data: CustomerUpdate):
 
 async def add_local_customer_service(user_id: str, update_data: AddLocalCustomer):
     update_data_dict = update_data.model_dump(exclude_unset = True)
-    inserted_customer = local_customers_collection.insert_one({"customer_user_id": update_data_dict.get("customer_user_id"),
-                                           "customer_tiktok_id": update_data_dict["customer_tiktok_id"],
-                                           "customer_name": update_data_dict["customer_name"],
-                                           "profile_picture_url": update_data_dict["profile_picture_url"],
-                                           "from_live_of_tiktok_id": update_data_dict["from_live_of_tiktok_id"],
-                                           "user_id": user_id,
-                                            "phone": [],
-                                            "address": [],
-                                           "created_at": datetime.now(),
-                                           "updated_at": datetime.now()})
-    customer = local_customers_collection.find_one({"_id": ObjectId(inserted_customer.inserted_id)})
+    try:
+        local_customers_collection.insert_one({"customer_user_id": update_data_dict.get("customer_user_id"),
+                                               "customer_tiktok_id": update_data_dict["customer_tiktok_id"],
+                                               "customer_name": update_data_dict["customer_name"],
+                                               "profile_picture_url": update_data_dict["profile_picture_url"],
+                                               "from_live_of_tiktok_id": update_data_dict["from_live_of_tiktok_id"],
+                                               "user_id": user_id,
+                                                "phone": [],
+                                                "address": [],
+                                               "created_at": datetime.now(),
+                                                "updated_at": datetime.now()})
+    except DuplicateKeyError:
+        pass
+    customer = local_customers_collection.find_one({"user_id": user_id, "customer_user_id": update_data_dict.get("customer_user_id"), "from_live_of_tiktok_id": update_data_dict["from_live_of_tiktok_id"]})
     customer["id"] = str(customer.pop("_id"))
     return customer
 
-async def get_local_customer_service(customer_user_id: str, from_live_of_tiktok_id: str):
-    customer = local_customers_collection.find_one({ "customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id })
+async def get_local_customer_service(customer_user_id: str, from_live_of_tiktok_id: str, user_id: str):
+    customer = local_customers_collection.find_one({ "customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id, "user_id": user_id })
     # Handle not found
     if not customer:
         raise HTTPException(status_code = 404, detail = "Không tìm thấy khách hàng")
@@ -167,8 +169,8 @@ async def get_global_customer_service(customer_user_id: str):
     customer["id"] = str(customer.pop("_id"))
     return customer
 
-async def remove_customer_elements_service(request: DeleteRequest, customer_user_id: str, from_live_of_tiktok_id: str):
-    customer = local_customers_collection.find_one({"customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id})
+async def remove_customer_elements_service(request: DeleteRequest, customer_user_id: str, from_live_of_tiktok_id: str, user_id: str):
+    customer = local_customers_collection.find_one({"customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id, "user_id": user_id})
     if not customer:
         raise HTTPException(status_code = 404, detail = "Customer not found")
 
@@ -191,7 +193,7 @@ async def remove_customer_elements_service(request: DeleteRequest, customer_user
         )
     # Update the document
     update_result = local_customers_collection.update_one(
-        {"customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id},
+        {"customer_user_id": customer_user_id, "from_live_of_tiktok_id": from_live_of_tiktok_id, "user_id": user_id},
         {"$set": {request.field: updated_values}}
     )
     if update_result.modified_count == 0:

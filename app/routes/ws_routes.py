@@ -1,10 +1,10 @@
 from datetime import datetime
-from fastapi import WebSocket, WebSocketDisconnect, APIRouter
+from fastapi import WebSocket, WebSocketDisconnect, APIRouter, status
 from TikTokLive import TikTokLiveClient
 from TikTokLive.events import CommentEvent
 import asyncio
-
 from app.config.database import global_customers_collection, local_customers_collection
+from app.middlewares.auth_middleware import auth_middleware
 
 ws_router = APIRouter()
 
@@ -43,10 +43,10 @@ ws_router = APIRouter()
 #         await asyncio.sleep(0.1)
 
 # WebSocket handler for multiple TikTok IDs
-async def handle_tiktok_live(websocket: WebSocket, tiktok_ids: list[str]):
+async def handle_tiktok_live(websocket: WebSocket, tiktok_ids: list[str], user_id: str):
     clients = []
 
-    print(f"{tiktok_ids}")
+    print(f"User ID {user_id} connecting ws: {tiktok_ids}")
 
     for tiktok_id in tiktok_ids:
         client = TikTokLiveClient(tiktok_id)
@@ -57,7 +57,7 @@ async def handle_tiktok_live(websocket: WebSocket, tiktok_ids: list[str]):
             async def on_comment(event: CommentEvent):
                 customer_user_id = str(event.user.id)
                 global_customer = global_customers_collection.find_one({"customer_user_id": customer_user_id})
-                local_customer = local_customers_collection.find_one({"customer_user_id": customer_user_id, "from_live_of_tiktok_id": current_tiktok_id })
+                local_customer = local_customers_collection.find_one({"customer_user_id": customer_user_id, "from_live_of_tiktok_id": current_tiktok_id, "user_id": user_id })
                 comment = {
                     "room_id": str(event.common.room_id),
                     "msg_id": str(event.common.msg_id),
@@ -100,7 +100,14 @@ async def handle_tiktok_live(websocket: WebSocket, tiktok_ids: list[str]):
 
 # WebSocket endpoint
 @ws_router.websocket("/{usernames}")
-async def websocket_endpoint(websocket: WebSocket, usernames: str):
+async def websocket_endpoint(websocket: WebSocket, usernames: str, token: str):
     await websocket.accept()
-    tiktok_ids = usernames.split(",")
-    await handle_tiktok_live(websocket, tiktok_ids)
+    try:
+        user = await auth_middleware(token)
+        if not user:
+            await websocket.close(code = status.WS_1008_POLICY_VIOLATION)  # Close with error code
+            return
+        tiktok_ids = usernames.split(",")
+        await handle_tiktok_live(websocket, tiktok_ids, str(user.get('_id')))
+    except WebSocketDisconnect:
+        print("WebSocket disconnected")
