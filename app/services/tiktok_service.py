@@ -2,7 +2,8 @@ import asyncio
 from datetime import datetime, timedelta
 
 from TikTokLive import TikTokLiveClient
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
 from TikTokLive.events import ConnectEvent, CommentEvent, LiveEndEvent, DisconnectEvent
 
 from app.config.database import rooms_collection, comments_collection
@@ -112,16 +113,15 @@ async def connect_live_service(tiktok_id: str, user_id: str, background_tasks: B
     # Check if current ID is online to raise an error
     another_room_live = await check_room_online(tiktok_id, user_id)
     if another_room_live:
-        raise HTTPException(status_code=400, detail=f"Kênh {tiktok_id} đang có một buổi phát trực tiếp khác!")
+        return JSONResponse(status_code = status.HTTP_400_BAD_REQUEST, content = {"detail": f"Kênh {tiktok_id} đang có một buổi phát trực tiếp khác!" })
 
     client: TikTokLiveClient = TikTokLiveClient(unique_id=f"@{tiktok_id}")
-    client.web.set_session_id('a2e52d35e8653c7f0f1db3f97d7f7c7e')
     live_handler = LiveTikTokHandler()
 
     try:
         is_live = await client.is_live()
         if not is_live:
-            raise HTTPException(status_code=400, detail=f"Kênh {tiktok_id} đang không phát trực tiếp")
+            return JSONResponse(status_code = status.HTTP_400_BAD_REQUEST, content = {"detail": f"Kênh {tiktok_id} đang không phát trực tiếp" })
 
         print(f"{tiktok_id} is live!")
 

@@ -104,6 +104,7 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
         sms_collection.insert_one(data.model_dump())
     except Exception as e:
         print(f"Failed to insert sms data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to insert sms data {e}")
 
     if bank_code == 'Vietcombank':
         bank_code = 'VCB'

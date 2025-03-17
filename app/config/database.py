@@ -26,7 +26,6 @@ pricing_tiktok_collection = database["pricing-tiktok"]
 # Set unique
 rooms_collection.create_index([("room_str_id", 1), ("user_id", 1)], unique=True)
 comments_collection.create_index([("msg_id", 1), ("room_id", 1)], unique=True)
-order_collection.create_index([("msg_id", 1)], unique=True)
 local_customers_collection.create_index([("customer_user_id", 1), ("from_live_of_tiktok_id", 1), ("user_id", 1)], unique=True)
 global_customers_collection.create_index([("customer_user_id", 1)], unique=True)
 qr_collection.create_index([("payment_description", 1)], unique=True)
