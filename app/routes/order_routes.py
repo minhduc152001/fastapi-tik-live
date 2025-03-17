@@ -1,11 +1,10 @@
 from datetime import datetime
 from typing import List, Optional
-
 from fastapi import APIRouter, Header, Path
 from fastapi.params import Query
-
+from unidecode import unidecode
 from app.controllers.order_controller import create_order, get_order, get_orders
-from app.models.order_model import Order, SubOrder, OrderCreateRequest
+from app.models.order_model import Order, OrderCreateRequest
 
 order_router = APIRouter()
 
@@ -36,7 +35,8 @@ async def retrieve_all_orders(authorization: str = Header(...),
     if customer_user_id:
         filters["customer_user_id"] = customer_user_id
     if customer_name:
-        filters["customer_name"] = {"$regex": customer_name, "$options": "i"}  # Case-insensitive search
+        customer_name_normalized = unidecode(customer_name)
+        filters["customer_name"] = {"$regex": customer_name_normalized, "$options": "i"}  # Case-insensitive search
     if start_date and end_date:
         filters["created_at"] = {"$gte": start_date, "$lte": end_date}
     return await get_orders(token, filters)

@@ -7,6 +7,18 @@ from app.config.database import users_collection
 from app.models.user_model import User, get_password_hash, verify_password, create_access_token, decode_token, \
     UserResponse, UserUpdateRequest, UserSignUp, AdminUpdateUserRequest
 
+def format_user(user: dict) -> UserResponse:
+    return UserResponse(
+        id=str(user["_id"]),
+        email=user["email"],
+        phone=user["phone"],
+        tiktok_ids=user.get("tiktok_ids", []),
+        role=user["role"],
+        subscription_expired_at=user.get("subscription_expired_at"),
+        created_at=user["created_at"],
+        last_tiktok_ids_updated_at=user.get("last_tiktok_ids_updated_at"),
+        max_tiktok_id_slots=user.get("max_tiktok_id_slots", 0)
+    )
 
 async def create_user(user: dict):
     # Check if email or username already exists
@@ -58,21 +70,12 @@ def get_user_by_email(email: str):
     return user
 
 async def get_users():
-    users = users_collection.find()
-    user_list = [
-        UserResponse(
-            id=str(user["_id"]),
-            email=user["email"],
-            phone=user["phone"],
-            tiktok_ids=user["tiktok_ids"],
-            role=user["role"],
-            subscription_expired_at = user["subscription_expired_at"],
-            created_at = user["created_at"],
-    )
-        for user in users
-    ]
+    users = users_collection.find()  # This returns a cursor
 
-    return user_list
+    # Convert each user to the formatted response
+    formatted_users = [format_user(user) for user in users]
+
+    return formatted_users
 
 
 def update_user_info(user_id: str, user_update: UserUpdateRequest):
@@ -171,6 +174,7 @@ def update_admin_user_info(user_id: str, user_update: AdminUpdateUserRequest):
             email=updated_user["email"],
             phone=updated_user["phone"],
             tiktok_ids=updated_user["tiktok_ids"],
+            max_tiktok_id_slots = updated_user.get("max_tiktok_id_slots", 0),
             role=updated_user["role"],
             subscription_expired_at=updated_user["subscription_expired_at"],
             created_at=updated_user["created_at"],

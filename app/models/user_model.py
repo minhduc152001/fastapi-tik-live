@@ -28,7 +28,7 @@ class UserResponse(BaseModel):
     subscription_expired_at: datetime = None
     created_at: datetime
     last_tiktok_ids_updated_at: Optional[datetime] = None
-    max_tiktok_id_slots: int = None
+    max_tiktok_id_slots: int = 0
 
 class UserSignUp(BaseModel):
     email: EmailStr
@@ -50,6 +50,7 @@ class UserUpdateRequest(BaseModel):
     tiktok_ids: Optional[List[str]] = None
 
 class AdminUpdateUserRequest(BaseModel):
+    max_tiktok_id_slots: Optional[int] = None
     phone: Optional[str] = None
     tiktok_ids: Optional[List[str]] = None
     subscription_expired_at: Optional[datetime] = None
