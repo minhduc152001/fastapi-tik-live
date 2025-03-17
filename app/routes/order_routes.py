@@ -31,7 +31,9 @@ async def retrieve_all_orders(authorization: str = Header(...),
     if room_id:
         filters["room_id"] = room_id
     if from_live_of_tiktok_id:
-        filters["from_live_of_tiktok_id"] = from_live_of_tiktok_id
+        from_live_ids = [item.strip() for item in from_live_of_tiktok_id.split(",") if item.strip()]
+        if from_live_ids:
+            filters["from_live_of_tiktok_id"] = {"$in": from_live_ids}
     if customer_user_id:
         filters["customer_user_id"] = customer_user_id
     if customer_name:
