@@ -20,7 +20,9 @@ async def retrieve_order(order_id: str = Path(..., description = "Order ID"), au
     return await get_order(token, order_id)
 
 @order_router.get('/', response_description = "List all Orders", status_code = 200, response_model=List[Order])
-async def retrieve_all_orders(authorization: str = Header(...), room_id: Optional[str] = Query(None),
+async def retrieve_all_orders(authorization: str = Header(...),
+                              room_id: Optional[str] = Query(None),
+                              from_live_of_tiktok_id: Optional[str] = Query(None),
                               customer_name: Optional[str] = Query(None),
                               start_date: Optional[datetime] = Query(None),
                               end_date: Optional[datetime] = Query(None),
@@ -29,6 +31,8 @@ async def retrieve_all_orders(authorization: str = Header(...), room_id: Optiona
     filters = {}
     if room_id:
         filters["room_id"] = room_id
+    if from_live_of_tiktok_id:
+        filters["from_live_of_tiktok_id"] = from_live_of_tiktok_id
     if customer_user_id:
         filters["customer_user_id"] = customer_user_id
     if customer_name:
