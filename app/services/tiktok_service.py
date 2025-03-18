@@ -1,19 +1,21 @@
 import asyncio
 from datetime import datetime, timedelta
-
 from TikTokLive import TikTokLiveClient
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from TikTokLive.events import ConnectEvent, CommentEvent, LiveEndEvent, DisconnectEvent
-
 from app.config.database import rooms_collection, comments_collection
 from app.models.comment_model import Comment
 from app.models.live_model import LiveConnectResponse
 from app.services.comment_service import create_comment_service
 from app.services.room_service import create_room_service, check_room_online, update_room_service
 from app.models.room_model import Room
-
 from fastapi import BackgroundTasks
+import os
+from TikTokLive.client.web.web_settings import WebDefaults
+
+EULER_API_KEY_2 = os.getenv("EULER_API_KEY_2")
+WebDefaults.tiktok_sign_api_key = EULER_API_KEY_2
 
 async def delete_old_records():
     while True:

@@ -5,6 +5,11 @@ from TikTokLive.events import CommentEvent
 import asyncio
 from app.config.database import global_customers_collection, local_customers_collection
 from app.middlewares.auth_middleware import auth_middleware
+from TikTokLive.client.web.web_settings import WebDefaults
+import os
+
+EULER_API_KEY_1 = os.getenv("EULER_API_KEY_1")
+WebDefaults.tiktok_sign_api_key = EULER_API_KEY_1
 
 ws_router = APIRouter()
 
@@ -50,7 +55,6 @@ async def handle_tiktok_live(websocket: WebSocket, tiktok_ids: list[str], user_i
 
     for tiktok_id in tiktok_ids:
         client = TikTokLiveClient(tiktok_id)
-        # client.web.set_session_id('72972926786302131211741950985674')
 
         # Use a closure to capture the current tiktok_id
         def make_on_comment_handler(current_tiktok_id):
