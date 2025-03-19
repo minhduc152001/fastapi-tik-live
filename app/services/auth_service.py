@@ -28,10 +28,10 @@ async def create_user(user: dict):
     # Hash the password
     hashed_password = get_password_hash(user.get("password"))
     user.update({
-        "max_tiktok_id_slots": 0,
+        "max_tiktok_id_slots": 1,
         "password": hashed_password,
         "role": "user",
-        "subscription_expired_at": user.get("subscription_expired_at") if user.get("subscription_expired_at") else datetime.now(),
+        "subscription_expired_at": datetime.now() + timedelta(days = 30),
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     })
