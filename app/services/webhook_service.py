@@ -144,6 +144,7 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
             update_fields["subscription_expired_at"] = user.get("subscription_expired_at") + timedelta(days = 30 * month_usage)
     else:
         print(f"No user found for invoice id: {invoice_id}")
+        return
 
     # Perform update only if there are fields to update
     users_collection.find_one_and_update({"_id": ObjectId(qr.get("user_id"))}, {"$set": update_fields})

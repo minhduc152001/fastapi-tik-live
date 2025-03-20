@@ -33,7 +33,8 @@ async def create_user(user: dict):
         "role": "user",
         "subscription_expired_at": datetime.now() + timedelta(days = 30),
         "created_at": datetime.now(),
-        "updated_at": datetime.now()
+        "updated_at": datetime.now(),
+        "is_active": True
     })
 
     # Insert into database
@@ -184,3 +185,11 @@ def update_admin_user_info(user_id: str, user_update: AdminUpdateUserRequest):
 
 async def delete_user_service(user_id: str):
     return users_collection.delete_one({"_id": ObjectId(user_id)})
+
+async def deactivate_user(user_id: str):
+    result = users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"is_active": False, "updated_at": datetime.now()}},
+        upsert=True
+    )
+    return result.modified_count > 0

@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, status, Header, Path
 from app.controllers.auth_controller import signup, login, logout, get_me, list_users, update_user, delete_user, \
-    update_user_admin
+    update_user_admin, deactivate
 from app.models.user_model import UserResponse, UserLogin, UserLoginResponse, UserUpdateRequest, UserSignUp, \
     AdminUpdateUserRequest
 
@@ -39,6 +39,11 @@ async def get_users_route(authorization: str = Header(...)):
 async def update_user_route(user_update: UserUpdateRequest, authorization: str = Header(...)):
     token = authorization.split(" ")[1]
     return await update_user(token, user_update)
+
+@auth_router.post("/deactivate_user", response_description="Deactivate User", status_code=status.HTTP_200_OK)
+async def deactivate_user_route(authorization: str = Header(...)):
+    token = authorization.split(" ")[1]
+    return await deactivate(token)
 
 # ADMINS ONLY
 @auth_router.delete("/{user_id}", response_description = "FOR ADMIN: Delete user", status_code=204, tags = ["admin"])

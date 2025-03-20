@@ -1,9 +1,9 @@
 from fastapi import HTTPException
 from jose import JWTError
 
-from app.middlewares.auth_middleware import auth_admin_middleware
+from app.middlewares.auth_middleware import auth_admin_middleware, auth_middleware
 from app.services.auth_service import create_user, authenticate_user, generate_access_token, decode_access_token, \
-    get_user_by_email, get_users, update_user_info, delete_user_service, update_admin_user_info
+    get_user_by_email, get_users, update_user_info, delete_user_service, update_admin_user_info, deactivate_user
 from app.models.user_model import User, UserResponse, UserLogin, UserLoginResponse, UserUpdateRequest, UserSignUp, \
     AdminUpdateUserRequest
 
@@ -82,3 +82,10 @@ async def delete_user(token: str, user_id: str):
 async def update_user_admin(token: str, user_id: str, user_update: AdminUpdateUserRequest):
     await auth_admin_middleware(token)
     return update_admin_user_info(user_id, user_update)
+
+async def deactivate(token: str):
+    user = await auth_middleware(token = token)
+    user = await deactivate_user(str(user.get('_id')))
+    if user:
+        return {"message": "Tài khoản đã bị khoá."}
+    raise HTTPException(status_code = 400, detail = "Có lỗi khi khoá tài khoản.")
