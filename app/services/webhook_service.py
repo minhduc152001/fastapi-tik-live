@@ -2,6 +2,7 @@ from datetime import datetime
 from datetime import timedelta
 from bson import ObjectId
 from fastapi import HTTPException
+from pymongo.errors import DuplicateKeyError
 
 from app.config.database import balance_movements_collection, invoices_collection, qr_collection, users_collection, \
     sms_collection
@@ -102,9 +103,9 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
     # Store sms history
     try:
         sms_collection.insert_one(data.model_dump())
-    except Exception as e:
+    except DuplicateKeyError:
         pass
-        print(f"Failed to insert sms data: {e}")
+        print(f"Failed to insert sms data.")
         return
 
     if bank_code == 'Vietcombank':
