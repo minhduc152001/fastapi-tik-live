@@ -30,6 +30,7 @@ class UserResponse(BaseModel):
     created_at: datetime
     last_tiktok_ids_updated_at: Optional[datetime] = None
     max_tiktok_id_slots: int = 0
+    is_active: bool = True
 
 class UserSignUp(BaseModel):
     email: EmailStr

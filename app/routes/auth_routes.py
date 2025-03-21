@@ -40,7 +40,7 @@ async def update_user_route(user_update: UserUpdateRequest, authorization: str =
     token = authorization.split(" ")[1]
     return await update_user(token, user_update)
 
-@auth_router.post("/deactivate_user", response_description="Deactivate User", status_code=status.HTTP_200_OK)
+@auth_router.post("/deactivate_user", response_description="Deactivate User", status_code=status.HTTP_200_OK, response_model=UserResponse)
 async def deactivate_user_route(authorization: str = Header(...)):
     token = authorization.split(" ")[1]
     return await deactivate(token)

@@ -19,6 +19,7 @@ async def signup(user):
         max_tiktok_id_slots=new_user.get("max_tiktok_id_slots", 0),
         subscription_expired_at=new_user["subscription_expired_at"] or None,
         created_at = new_user["created_at"],
+        is_active = new_user["is_active"],
     )
 
 async def login(body: UserLogin):
