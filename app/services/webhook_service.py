@@ -3,6 +3,7 @@ from datetime import timedelta
 from bson import ObjectId
 from fastapi import HTTPException
 from pymongo.errors import DuplicateKeyError
+from starlette.responses import JSONResponse
 
 from app.config.database import balance_movements_collection, invoices_collection, qr_collection, users_collection, \
     sms_collection
@@ -106,7 +107,7 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
     except DuplicateKeyError:
         pass
         print(f"Failed to insert sms data.")
-        return
+        return JSONResponse(status_code=200 ,content = {"success": False, "message": "Failed to insert sms data."})
 
     if bank_code == 'Vietcombank':
         bank_code = 'VCB'
@@ -116,7 +117,7 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
     # If format HoaDon___ not existed -> throw e
     if "HoaDon" not in msg:
         print(f"The description does not contain HoaDon: {bank_code} - {msg}.")
-        return
+        return JSONResponse(status_code=200 ,content = {"success": False, "message": "The description does not contain HoaDon."})
 
     # Store balance changes
     balance_movements_collection.insert_one(transaction)
@@ -125,7 +126,7 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
     qr = qr_collection.find_one({"payment_description": invoice_id})
     if not qr:
         print("No payment description found for invoice id: {}".format(invoice_id))
-        return
+        return JSONResponse(status_code=200 ,content = {"success": False, "message": "No payment description found."})
 
     # Store invoice
     update_fields = {}
@@ -145,7 +146,7 @@ async def handle_webhook_service(data: RetrieveWebhookBase):
             update_fields["subscription_expired_at"] = user.get("subscription_expired_at") + timedelta(days = 30 * month_usage)
     else:
         print(f"No user found for invoice id: {invoice_id}")
-        return
+        return JSONResponse(status_code=200 ,content = {"success": False, "message": "No user found."})
 
     # Perform update only if there are fields to update
     users_collection.find_one_and_update({"_id": ObjectId(qr.get("user_id"))}, {"$set": update_fields})
