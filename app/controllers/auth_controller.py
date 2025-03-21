@@ -26,10 +26,12 @@ async def login(body: UserLogin):
     email = body.email
     password = body.password
     user = await authenticate_user(email, password)
+    is_active = user.get("is_active", True)
     token = await generate_access_token(user)
     return UserLoginResponse(
         token=token,
         token_type='bearer',
+        is_active=is_active
     )
 
 async def logout(token: str):

@@ -46,6 +46,7 @@ class UserLogin(BaseModel):
 class UserLoginResponse(BaseModel):
     token: str
     token_type: str
+    is_active: bool = True
 
 class UserUpdateRequest(BaseModel):
     phone: Optional[str] = None
